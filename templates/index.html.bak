@@ -28,9 +28,6 @@
             background-color: #de8a17;
             color: white;
         }
-        .edit{
-            width: 120px;
-        }
     </style>
 </head>
 <body>
@@ -112,34 +109,39 @@
                     {% for k,v in message.items %}
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <a rel="nofollow" class="panel-title collapsed" data-toggle="collapse" data-parent="#groups" href="#{{ k }}">{{ k }}</a>
-
+                                 <a rel="nofollow" class="panel-title collapsed" data-toggle="collapse" data-parent="#groups" href="#{{ k }}">{{ k }}</a>
                             </div>
                             <div class="panel-collapse collapse" id={{ k }} >
                                 <div class="panel-body">
                                     <div class="col-md-12 column">
+                                        <div num="0">
+                                            <input type="button" value="全选" onclick="SelectAll(this);" />
+                                            <input type="button" value="取消" onclick="CancelAll(this);" />
+                                            <input type="button" value="反选" onclick="ReverseAll(this);" />
+                                            <input type="button" id="edit" class="ed" onclick="ChangeMode(this);" value="批量编辑" />
+                                            <input type="button" id="delete" class="ed" onclick="DeleteSelect(this);" value="批量删除" />
+                                        </div>
                                         <table class="table table-bordered">
                                             <thead>
                                                 <tr>
-                                                    <span style="float:left;" class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                                                    <th>主机ID</th>
+                                                    <th></th>
                                                     <th>主机名</th>
                                                     <th>IP</th>
                                                     <th>端口</th>
                                                     <th>用户名</th>
                                                     <th>密码</th>
-                                                    <th>操作&nbsp;&nbsp;<a style="color: red;" href="javascript:void(0);" onclick="Add(this)">添加</a></th>
+                                                    <th>操作</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {% for foo in v %}
                                                     <tr>
-                                                        <td name="id">{{ foo.id }}</td>
-                                                        <td name="hostname" class="edit_input">{{ foo.hostname }}</td>
-                                                        <td name="ip" class="edit_input">{{ foo.ip }}</td>
-                                                        <td name="port" class="edit_input">{{ foo.port }}</td>
-                                                        <td name="username" class="edit_input">{{ foo.username }}</td>
-                                                        <td name="password" class="edit_input">{{ foo.password }}</td>
+                                                        <td><input type="checkbox" /></td>
+                                                        <td class="edit_input">{{ foo.hostname }}</td>
+                                                        <td class="edit_input">{{ foo.ip }}</td>
+                                                        <td class="edit_input">{{ foo.port }}</td>
+                                                        <td class="edit_input">{{ foo.username }}</td>
+                                                        <td class="edit_input">{{ foo.password }}</td>
                                                         <td><a href="javascript:void(0)" onclick="Edit(this);">编辑</a>&nbsp;&nbsp;<a href="javascript:void(0);" onclick="Delete(this);">删除</a></td>
                                                     </tr>
                                                 {% endfor %}
@@ -159,7 +161,6 @@
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="/static/js/jquery-2.1.4.js"></script>
-    <script src="/static/js/jquery.cookie.js"></script>
     <script src="/static/js/common.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/static/plugins/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
