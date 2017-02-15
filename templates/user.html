@@ -50,11 +50,11 @@
 
                     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                         <ul class="nav navbar-nav">
-                            <li class="active">
-                                <a rel="nofollow" href="#">主机管理</a>
-                            </li>
                             <li>
-                                <a rel="nofollow" href="/user/">用户中心</a>
+                                <a rel="nofollow" href="/index/">主机管理</a>
+                            </li>
+                            <li class="active">
+                                <a rel="nofollow" href="#">用户中心</a>
                             </li>
                             <li class="dropdown">
                                  <a rel="nofollow" href="#" class="dropdown-toggle" data-toggle="dropdown">功能选择<strong class="caret"></strong></a>
@@ -97,37 +97,89 @@
                     </div>
                 </nav>
                 <div class="panel-group" id="groups">
-                    <h3>可管理主机组</h3>
-                    {% for k,v in message.items %}
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <a rel="nofollow" class="panel-title collapsed" data-toggle="collapse" data-parent="#groups" href="#user_info">个人信息</a>
+                        </div>
+                        <div class="panel-collapse collapse" id="user_info" >
+                            <div class="panel-body">
+                                <div class="col-md-12 column">
+                                    <table class="table table-bordered">
+                                            <tr>
+                                                <th>用户ID</th>
+                                                <td name="id">{{ user_id }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>用户名</th>
+                                                <td name="username" class="edit_input">{{ user }}</td>
+                                            </tr>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <a rel="nofollow" class="panel-title collapsed" data-toggle="collapse" data-parent="#groups" href="#updata_password">修改密码</a>
+                        </div>
+                        <div class="panel-collapse collapse" id="updata_password" >
+                            <div class="panel-body">
+                                <div class="col-md-12 column">
+                                    <form action="/user/" method="POST">
+                                        {% csrf_token %}
+                                        <table class="table table-bordered">
+                                            <tr>
+                                                <th>原密码</th>
+                                                <td><input type="password" id="old_password" name="old_password" /></td>
+                                            </tr>
+                                            <tr>
+                                                <th>新密码</th>
+                                                <td><input type="password"id="new_password" name="new_password" /></td>
+                                            </tr>
+                                            <tr>
+                                                <th>确认密码</th>
+                                                <td><input type="password" id="re_password" name="re_password" /></td>
+                                            </tr>
+                                        </table>
+                                        <input type="button" value="提交" onclick="CheckValid();" />
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if user == 'admin' %}
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <a rel="nofollow" class="panel-title collapsed" data-toggle="collapse" data-parent="#groups" href="#{{ k }}">{{ k }}</a>
+                                <a rel="nofollow" class="panel-title collapsed" data-toggle="collapse" data-parent="#groups" href="#user_manage">用户管理</a>
                             </div>
-                            <div class="panel-collapse collapse" id={{ k }} >
+                            <div class="panel-collapse collapse" id="user_manage" >
                                 <div class="panel-body">
                                     <div class="col-md-12 column">
                                         <table class="table table-bordered">
                                             <thead>
                                                 <tr>
-                                                    <th>主机ID</th>
-                                                    <th>主机名</th>
-                                                    <th>IP</th>
-                                                    <th>端口</th>
+                                                    <th>用户ID</th>
                                                     <th>用户名</th>
-                                                    <th>密码</th>
-                                                    <th>操作&nbsp;&nbsp;<a style="color: red;" href="javascript:void(0);" onclick="AddHost(this)">添加主机</a></th>
+                                                    <th>用户密码</th>
+                                                    <th>主机组</th>
+                                                    <th>操作&nbsp;&nbsp;<a style="color: red;" href="javascript:void(0);" onclick="AddUser(this)">添加用户</a></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for foo in v %}
+                                                {% for k,v in message.items %}
                                                     <tr>
-                                                        <td name="id">{{ foo.id }}</td>
-                                                        <td name="hostname" class="edit_input">{{ foo.hostname }}</td>
-                                                        <td name="ip" class="edit_input">{{ foo.ip }}</td>
-                                                        <td name="port" class="edit_input">{{ foo.port }}</td>
-                                                        <td name="username" class="edit_input">{{ foo.username }}</td>
-                                                        <td name="password" class="edit_input">{{ foo.password }}</td>
-                                                        <td><a href="javascript:void(0)" onclick="EditHost(this);">编辑</a>&nbsp;&nbsp;<a href="javascript:void(0);" onclick="DeleteHost(this);">删除</a></td>
+                                                        <td name="id">{{ k.id }}</td>
+                                                        <td name="username" class="edit_input">{{ k.user }}</td>
+                                                        <td name="password" class="edit_input">{{ k.pwd }}</td>
+                                                        <td name="hostgroup" class="edit_select">
+                                                            {% for foo in v %}
+                                                                <span>{{ foo.name }}</span>
+                                                            {% endfor %}
+                                                        </td>
+                                                        <td><a href="javascript:void(0)" onclick="EditUser(this);">编辑</a>&nbsp;&nbsp;<a href="javascript:void(0);" onclick="DeleteUser(this);">删除</a></td>
                                                     </tr>
                                                 {% endfor %}
                                             </tbody>
@@ -136,7 +188,8 @@
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
+                    {% endif %}
+
                 </div>
             </div>
         </div>
@@ -150,5 +203,7 @@
     <script src="/static/js/common.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/static/plugins/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <script>
+    </script>
 </body>
 </html>

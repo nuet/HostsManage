@@ -88,3 +88,92 @@ def logout(request):
     """
     del request.session['user']
     return redirect('/login/')
+
+
+@auth
+def user(request):
+    """
+    用户中心
+    :param request:
+    :return:
+    """
+    user = request.session.get('user', None)
+    if request.POST:
+        ret = {'status': False}
+        status = request.POST.get('status')
+        if status == 'update_pwd':
+            old_password = request.POST.get('old_password')
+            new_password = request.POST.get('new_password')
+            re_password = request.POST.get('re_password')
+            if len(models.User.objects.filter(user=user, pwd=old_password)) > 0:  # 原密码正确
+                if new_password == re_password:  # 两次密码输入相同
+                    models.User.objects.filter(user=user).update(pwd=new_password)
+                    ret['status'] = True
+                    del request.session['user']
+                else:  # 密码输入不一致
+                    ret['message'] = 'pwd_diff'
+            else:  # 原密码错误
+                ret['message'] = 'pwd_error'
+        else:
+            user_id = request.POST.get('id')
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            hostgroup = request.POST.get('hostgroup')
+            # print(hostgroup)
+
+            if status == 'edit':  # 修改数据
+                if user_id:  # 有id，修改数据
+                    models.User.objects.filter(id=user_id).update(user=username, pwd=password)
+                    for groupname in hostgroup.split('_'):
+                        group_obj = models.HostGroup.objects.get(name=groupname)
+                        models.User.objects.get(id=user_id).group.add(group_obj)
+                    ret['id'] = None
+                    ret['status'] = True
+                else:  # 无id，添加数据
+                    models.User.objects.create(user=username, pwd=password)
+                    id = models.User.objects.get(user=username, pwd=password).id
+                    for groupname in hostgroup.split('_'):
+                        group_obj = models.HostGroup.objects.get(name=groupname)
+                        models.User.objects.get(id=id).group.add(group_obj)
+
+                    ret['id'] = id
+                    ret['status'] = True
+            elif status == 'delete':  # 删除数据
+                models.User.objects.filter(id=user_id).delete()
+                ret['status'] = True
+        return HttpResponse(json.dumps(ret))
+    else:
+        user_info = {'user': None, 'message': {}}
+        user_info['user'] = user
+        user_obj = models.User.objects.filter(user=user).first()
+        user_info['user_id'] = user_obj.id
+        if user == 'admin':
+            user_all = models.User.objects.exclude(user='admin')
+            # user_info['message'] = user_all
+
+            for u in user_all:
+                u_groups = models.User.objects.get(user=u).group.all()
+                user_info['message'][u] = u_groups
+
+            groups = models.HostGroup.objects.all()
+            user_info['groups'] = []
+            for group in groups:
+                user_info['groups'].append(group.name)
+        return render(request, 'user.html', user_info)
+
+
+@auth
+def get_groups(request):
+    """
+    获取主机组信息
+    :param request:
+    :return:
+    """
+    ret = {'status': False, 'message': None}
+    if request.POST:
+        groups = models.HostGroup.objects.all()
+        ret['message'] = []
+        for group in groups:
+            ret['message'].append(group.name)
+        ret['status'] = True
+    return HttpResponse(json.dumps(ret))
